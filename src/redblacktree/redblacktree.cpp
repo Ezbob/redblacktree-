@@ -6,31 +6,28 @@
 #include "redblacktree.hpp"
 using namespace RedBlackTree;
 
-
-template<typename K, typename V>
-RedBlackTree::Tree<K, V>::Node<K, V>* RedBlackTree::Tree<K, V>::minKeyNode(RedBlackTree::Tree<K, V>::Node<K, V> *n) {
-	if (n == nullptr) {
-		return nullptr;
-	} else if (n->left == nullptr) {
-		return n;
-	}
-	Node<K, V> *iterator = n->left;
-	while (iterator->left != nullptr) {
-		iterator = iterator->left;
-	}
-	return iterator;
+namespace RedBlackTree {
+	template<typename K,typename V>
+    Node<K,V> *Node<K, V>::nill = new Node<K, V>{};
 }
 
-
 template<typename K, typename V>
-template<typename U, typename R>
-void Tree<K, V>::Node<U, R>::recursive_print(Node<U, R> *n, std::ostream &os, std::vector<std::string> &ss) {
+void Node<K, V>::recursive_print(Node<K, V> *n, std::ostream &os, std::vector<std::string> &ss) {
 
-    if ( n == nullptr ) {
+    if ( n == Node<K, V>::nill ) {
         os << "NULL(BLACK)\n";
         return;
     } else {
-        os << "Node(" << ToString(n->color) << ", " << n->key << ", " << *n->data << ")\n";    
+        os << "Node(";     
+        switch(n->color) {
+            case Color::RED:
+                os << "RED";
+                break;
+            case Color::BLACK:
+                os << "BLACK";
+                break;
+        }
+        os << ", " << n->key << ", " << *n->data << ")\n";
     }
 
     for (auto str : ss) {
@@ -39,7 +36,7 @@ void Tree<K, V>::Node<U, R>::recursive_print(Node<U, R> *n, std::ostream &os, st
 
     os << " ├──";
     ss.push_back(std::string{" │ "});
-    recursive_print(n->left, os, ss);
+    recursive_print(n->right, os, ss);
     ss.pop_back();
 
     for (auto str : ss) {
@@ -48,17 +45,48 @@ void Tree<K, V>::Node<U, R>::recursive_print(Node<U, R> *n, std::ostream &os, st
 
     os << " └──";
     ss.push_back(std::string{"   "});
-    recursive_print(n->right, os, ss);
+    recursive_print(n->left, os, ss);
     ss.pop_back();    
 }
 
 template<typename K, typename V>
-void Tree<K, V>::insert(const K key, V *value) {
-	Node<K, V> *n = new Node<K, V>{key, value};
-	Node<K, V> *iterator = this->root;
+Node<K, V> *Tree<K, V>::getFrom(Node<K, V> *node, K key) {
+	Node<K, V> *iter = node;
+	while ( iter->key != key ) {
+		if ( iter->key > key ) {
+			iter = iter->left;
+		} else {
+			iter = iter->right;
+		}
+	}
+	return iter;
+}
 
-	while ( iterator != nullptr ) { // traversal of the tree finding parent of node
-        n->parent = iterator;
+template<typename K, typename V>
+Node<K, V>* Tree<K, V>::minKeyNode(Node<K, V> *n) {
+	if (n == Node<K, V>::nill) {
+		return Node<K, V>::nill;
+	} else if (n->left == Node<K, V>::nill) {
+		return n;
+	}
+	Node<K, V> *iterator = n->left;
+	while (iterator->left != Node<K, V>::nill) {
+		iterator = iterator->left;
+	}
+	return iterator;
+}
+
+template<typename K, typename V>
+void Tree<K, V>::insert(const K key, V *value) {
+
+	Node<K, V> *n = new Node<K, V>{key, value, Node<K, V>::nill, Node<K, V>::nill, Node<K, V>::nill};
+	
+	Node<K, V> *iterator = this->root;
+	Node<K, V> *p = Node<K, V>::nill;
+	
+
+	while ( iterator != Node<K, V>::nill ) { // traversal of the tree finding parent of node
+        p = iterator;
         if ( n->key < iterator->key ) {
             iterator = iterator->left;
         } else if ( n->key > iterator->key ) {
@@ -68,84 +96,63 @@ void Tree<K, V>::insert(const K key, V *value) {
         }
     }
 
-    if ( n->parent == nullptr ) {
+    n->parent = p;
+    
+    if ( p == Node<K, V>::nill ) {
     	this->root = n;
-    } else if ( n->key < n->parent->key  ) {
-    	n->parent->left = n;
+    } else if ( n->key < p->key  ) {
+    	p->left = n;
     } else {
-    	n->parent->right = n;
+    	p->right = n;
     }
 
-    n->color = RedBlackTree::Color::RED;
+    n->left = Node<K, V>::nill;
+    n->right = Node<K, V>::nill;
+    n->color = Color::RED;
     this->insertFixup(n);
 }
 
 template<typename K, typename V>
 bool Tree<K, V>::remove(K key) {
-	Node<K, V> *node = this->root;
+	Node<K, V> *node;
+	node = getFrom(this->root, key);
 
-	std::cout << " . . " << node << std::endl;
-
-    while ( node != nullptr && node->key != key ) {
-        if ( key < node->key ) {
-            node = node->left;
-        } else {
-            node = node->right;
-        }
-    }
-
-    if ( node == nullptr ) {
-    	std::cout << "false\n";
+    if ( node == Node<K, V>::nill ) {
     	return false;
     }
 
-    Node<K, V> *point;
-    Node<K, V> *old = node;
-    auto old_color = node->color;
+    Node<K, V> *point = Node<K, V>::nill;
+    Node<K, V> *min = node;
+    auto minColor = min->color;
 
-    if ( node->right == nullptr && node->left == nullptr ) {
-        // this step is needed since the book uses the T.nill difinition
-        // which is always black and is a allocated object (in contrast to our nullptr) 
-    	std::cout << "b" << std::endl;
-        transplantTree(node, nullptr);
-        std::cout << "COMPLETE" << node << std::endl;
-    } else if ( node->left == nullptr ) {
-    	std::cout << "r" << node->right << std::endl;
+	if ( node->left == Node<K, V>::nill ) {
         point = node->right;
-        transplantTree(node, node->right);       
-    } else if ( node->right == nullptr ) {
-    	std::cout << "l" << node->left << std::endl;
+        transplantTree(node, node->right);     
+    } else if ( node->right == Node<K, V>::nill ) {
         point = node->left;
         transplantTree(node, node->left);
     } else {
-    	std::cout << "n" << std::endl;
-        old = minKeyNode( node->right );
+        min = minKeyNode( node->right );
 
-        std::cout << old->key << "!\n";
-        old_color = old->color;
-        point = old->right;
+        minColor = min->color;
+        point = min->right;
 
-        if ( old->parent == node ) {
-            if ( point != nullptr ) {
-                point->parent = old;    
-            }
+        if ( min->parent == node ) {
+            point->parent = min;
         } else {
-            transplantTree(old, old->right);
-            old->right = node->right;
-            old->right->parent = old;
+            transplantTree(min, min->right);
+            min->right = node->right;
+            min->right->parent = min;
         }
-        transplantTree(node, old);
-        old->left = node->left;
-        old->left->parent = old;
-        old->color = node->color;
+        transplantTree(node, min);
+        min->left = node->left;
+        min->left->parent = min;
+        min->color = node->color;
     }
-    if (point == nullptr) std::cout << " next\n";
-    std::cout << " hehe\n";
-    if ( old_color == Color::BLACK ) {
-    	std::cout << "fixing this\n";
+    
+    if ( minColor == Color::BLACK ) {
     	removeFixup(point);
     }
-    std::cout << "FIXED IT\n";
     delete node;
 
     return true;
@@ -156,7 +163,7 @@ template<typename K, typename V>
 V *Tree<K, V>::minimum() {
 	Node<K, V> *iter = this->root;
 
-	while ( iter != nullptr and iter->left != nullptr ) {
+	while ( iter != Node<K, V>::nill and iter->left != Node<K, V>::nill ) {
 		iter = iter->left;
 	}
 
@@ -167,7 +174,7 @@ template<typename K, typename V>
 V *Tree<K, V>::maximum() {
 	Node<K, V> *iter = this->root;
 
-	while ( iter != nullptr and iter->right != nullptr ) {
+	while ( iter != Node<K, V>::nill and iter->right != Node<K, V>::nill ) {
 		iter = iter->right;
 	}
 
@@ -176,120 +183,108 @@ V *Tree<K, V>::maximum() {
 
 template<typename K, typename V>
 V *Tree<K, V>::get(const K key) {
-	Node<K, V> *iter = this->root;
+	Node<K, V> *iter = getFrom(this->root, key);
 
-	while ( iter != nullptr ) {
-		if ( iter->key == key ) {
-			return iter->data;
-		} else if ( iter->key < key ) {
-			iter = iter->left;
-		} else {
-			iter = iter->right;
-		}
+	if (iter != Node<K, V>::nill) {
+		return iter->data;
 	}
-
 	return nullptr;
 }
 
 template<typename K, typename V>
 void Tree<K, V>::rotateLeft(Node<K, V> *node) {
-	if ( node->right != nullptr ) {
-        Node<K, V> *rightNode = node->right;
-        node->right = rightNode->left;
 
-        if ( rightNode->left != nullptr ) {
-            rightNode->left->parent = node;
-        }
-        rightNode->parent = node->parent;
+    Node<K, V> *rightNode = node->right;
+    node->right = rightNode->left;
 
-        if ( node->parent == nullptr ) {
-            this->root = rightNode;
-        } else if ( node == node->parent->left ) {
-            node->parent->left = rightNode;
-        } else {
-            node->parent->right = rightNode;
-        }
-        rightNode->left = node;
-        node->parent = rightNode;
+    if ( rightNode->left != Node<K, V>::nill ) {
+        rightNode->left->parent = node;
     }
+    rightNode->parent = node->parent;
+
+    if ( node->parent == Node<K, V>::nill ) {
+        this->root = rightNode;
+    } else if ( node == node->parent->left ) {
+        node->parent->left = rightNode;
+    } else {
+        node->parent->right = rightNode;
+    }
+    rightNode->left = node;
+    node->parent = rightNode;
 }
 
 template<typename K, typename V>
 void Tree<K, V>::rotateRight(Node<K, V> *node) {
-	if ( node->left != nullptr ) {
-        Node<K, V> *leftNode = node->left;
-        node->left = leftNode->right;
-        
-        if ( leftNode->right != nullptr ) {
-            leftNode->right->parent = node;
-        }
-        leftNode->parent = node->parent;
+
+    Node<K, V> *leftNode = node->left;
+    node->left = leftNode->right;
     
-        if ( node->parent == nullptr ) {
-            this->root = leftNode;
-        } else if ( node == node->parent->left ){
-            node->parent->left = leftNode;
-        } else {
-            node->parent->right = leftNode;
-        }
-        leftNode->right = node;
-        node->parent = leftNode;
+    if ( leftNode->right != Node<K, V>::nill ) {
+        leftNode->right->parent = node;
     }
+    leftNode->parent = node->parent;
+
+    if ( node->parent == Node<K, V>::nill ) {
+        this->root = leftNode;
+    } else if ( node == node->parent->left ){
+        node->parent->left = leftNode;
+    } else {
+        node->parent->right = leftNode;
+    }
+    leftNode->right = node;
+    node->parent = leftNode;
 }
 
 template<typename K, typename V>
 void Tree<K, V>::transplantTree( Node<K, V> *old, Node<K,V> *transplant ) {
-	if ( old->parent == nullptr ) {
+	if ( old->parent == Node<K, V>::nill ) {
         this->root = transplant;
     } else if ( old == old->parent->left ) {
         old->parent->left = transplant;
     } else {
         old->parent->right = transplant;
     }
-	if ( transplant != nullptr ) {
-		transplant->parent = old->parent;   
-	} 
+	transplant->parent = old->parent;
 }
 
 template<typename K, typename V>
 void Tree<K, V>::insertFixup(Node<K, V> *node) {
-	if ( node == nullptr ) {
-		return;
-	}
-	while ( RBT_IS_RED( node->parent ) ) {
+	while ( node->parent->color == Color::RED ) {
         if ( node->parent == node->parent->parent->left ) {
             Node<K, V> *right_node = node->parent->parent->right;
-            if ( RBT_IS_RED( right_node ) ) {
+            if ( right_node->color == Color::RED ) {
                 // uncle and parent of node is red -> color them black
                 node->parent->color = Color::BLACK;
                 right_node->color = Color::BLACK;
                 node->parent->parent->color = Color::RED;
                 node = node->parent->parent;
-                continue;
+                
             } else if ( node == node->parent->right ) {
                 // uncle is black
                 node = node->parent;
                 rotateLeft(node);
+            } else {
+            	node->parent->color = Color::BLACK;
+            	node->parent->parent->color = Color::RED;
+            	rotateRight(node->parent->parent);
             }
 
-            node->parent->color = Color::BLACK;
-            node->parent->parent->color = Color::RED;
-            rotateRight(node->parent->parent);
         } else {
             Node<K, V> *left_node = node->parent->parent->left;
-            if ( RBT_IS_RED( left_node ) ) {
+            if ( left_node->color == Color::RED ) {
                 node->parent->color = Color::BLACK;
                 left_node->color = Color::BLACK;
                 node->parent->parent->color = Color::RED;
                 node = node->parent->parent;
-                continue;
+                
             } else if ( node == node->parent->left ) {
                 node = node->parent;
                 rotateRight(node);
+            } else {
+            	node->parent->color = Color::BLACK;
+            	node->parent->parent->color = Color::RED;
+            	rotateLeft(node->parent->parent);
             }
-            node->parent->color = Color::BLACK;
-            node->parent->parent->color = Color::RED;
-            rotateLeft(node->parent->parent);
         }
     }
     root->color = Color::BLACK;
@@ -297,55 +292,61 @@ void Tree<K, V>::insertFixup(Node<K, V> *node) {
 
 template<typename K, typename V>
 void Tree<K, V>::removeFixup(Node<K, V> *node) {
-	std::cout << node->parent << " <<-\n";
-	while ( RBT_IS_BLACK( node ) && node != this->root ) {
 
+	while ( node->color == Color::BLACK && node != this->root ) {
 		if ( node == node->parent->left ) {
-
             Node<K, V> *sibling = node->parent->right;
-            if ( RBT_IS_RED( sibling ) ) {
+            if ( sibling->color == Color::RED ) {
+
                 sibling->color = Color::BLACK;
                 node->parent->color = Color::RED;
                 rotateLeft( node->parent );
                 sibling = node->parent->right;
-            }
-            if ( RBT_IS_BLACK( sibling->left ) && RBT_IS_BLACK( sibling->right ) ) {
+            } 
+            if ( sibling->left->color == Color::BLACK && 
+            	sibling->right->color == Color::BLACK ) {
+                
                 sibling->color = Color::RED;
                 node = node->parent;
-            } else if ( RBT_IS_BLACK( sibling->right ) ) {
+            } else if ( sibling->right->color == Color::BLACK ) {
+
                 sibling->left->color = Color::BLACK;
                 sibling->color = Color::RED;
                 rotateRight( sibling );
                 sibling = node->parent->right;
+            } else {
+            	sibling->color = node->parent->color;
+	            node->parent->color = Color::BLACK;
+	            sibling->right->color = Color::BLACK;
+	            rotateLeft( node->parent );
+	            node = this->root;
             }
-            sibling->color = node->parent->color;
-            node->parent->color = Color::BLACK;
-            sibling->right->color = Color::BLACK;
-            rotateLeft( node->parent );
-            node = this->root;
-        } else {
+
+        } else if ( node == node->parent->right ) {
             Node<K, V> *sibling = node->parent->left;
-            if ( RBT_IS_RED( sibling ) ) {
+            if ( sibling->color == Color::RED ) {
                 sibling->color = Color::BLACK;
                 node->parent->color = Color::RED;
                 rotateRight( node->parent );
                 sibling = node->parent->left;
             }
-            if ( RBT_IS_BLACK( sibling->right ) && RBT_IS_BLACK( sibling->left ) ) {
+            if ( sibling->right->color == Color::BLACK && 
+            	sibling->left->color == Color::BLACK ) {
                 sibling->color = Color::RED;
                 node = node->parent;
-            } else if ( RBT_IS_BLACK( sibling->left ) ) {
+            } else if ( sibling->left->color == Color::BLACK ) {
                 sibling->right->color = Color::BLACK;
                 sibling->color = Color::RED;
                 rotateLeft( sibling );
                 sibling = node->parent->left;
+            } else {
+            	sibling->color = node->parent->color;
+	            node->parent->color = Color::BLACK;
+	            sibling->left->color = Color::BLACK;
+	            rotateRight( node->parent );
+	            node = this->root;
             }
-            sibling->color = node->parent->color;
-            node->parent->color = Color::BLACK;
-            sibling->left->color = Color::BLACK;
-            rotateRight( node->parent );
-            node = this->root;
-        }
+        } 
     }
     node->color = Color::BLACK;
 }
@@ -363,12 +364,18 @@ int main()
 	for ( auto elm : a ) {
 		if ( elm == 42) {
 			t.insert(elm, &v3);
+		}  else if (elm == -1) {
+			t.insert(elm, &v2);
 		} else {
 			t.insert(elm, &v);	
 		}
 	}
 
 	std::cout << t << std::endl;
+
+	std::cout << "min: " << *t.minimum() << " max: " << *t.maximum() << std::endl; 
+
+	std::cout << "--->" << *t.get(-1) << std::endl;
 
 	std::cout << *t.maximum() << std::endl;
 
