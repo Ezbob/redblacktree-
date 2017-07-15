@@ -38,15 +38,15 @@ SRC = $(foreach sdir, $(SRC_DIR), $(wildcard $(sdir)*.cc)) $(foreach sdir, $(SRC
 OBJ = $(patsubst $(SOURCE_PREFIX)%.cc, $(BUILD_PREFIX)$(COMPILED_DIR)%.o, $(filter %.cc, $(SRC))) $(patsubst $(SOURCE_PREFIX)%.cpp, $(BUILD_PREFIX)$(COMPILED_DIR)%.o, $(filter %.cpp, $(SRC))) 
 
 TEXEC_PATH = $(addprefix $(BIN_PATH), $(TEST_EXEC))
-TEST_SRC_DIR = $(addprefix $(TEST_PREFIX), $(TEST_MODULES))
-TEST_DIR = $(addprefix $(BUILD_PREFIX), $(addprefix $(T_COMPILED_DIR), $(TEST_MODULES)))
+TEST_SRC_DIR = $(addprefix $(TEST_PREFIX), $(TEST_MODULES_DIR))
+TEST_DIR = $(addprefix $(BUILD_PREFIX), $(addprefix $(T_COMPILED_DIR), $(TEST_MODULES_DIR)))
 
 T_SRC = $(foreach tdir, $(TEST_SRC_DIR), $(wildcard $(tdir)*.cc)) $(foreach tdir, $(TEST_SRC_DIR), $(wildcard $(tdir)*.cpp))
 T_OBJ = $(patsubst $(TEST_PREFIX)%.cc, $(BUILD_PREFIX)$(T_COMPILED_DIR)%.o, $(filter %.cc, $(T_SRC))) $(patsubst $(TEST_PREFIX)%.cpp, $(BUILD_PREFIX)$(T_COMPILED_DIR)%.o, $(filter %.cpp, $(T_SRC)))
 
 VPATH = $(SRC_DIR) $(TEST_SRC_DIR)
 
-.PHONY: all test checkdirs testcheckdirs clean run_tests rollout
+.PHONY: all test checkdirs testcheckdirs clean run_tests rollout valgrind valgrind_test
 
 all: checkdirs $(EXEC_PATH)
 
@@ -54,6 +54,7 @@ tests: testcheckdirs $(TEXEC_PATH)
 
 run_tests: tests
 	exec $(TEXEC_PATH)
+
 run: all
 	exec $(EXEC_PATH)
 
@@ -66,20 +67,23 @@ checkdirs: $(BUILD_DIR) $(BIN_PATH)
 clean:
 	rm -rf $(BUILD_PREFIX)
 
+valgrind: $(EXEC_PATH)
+	valgrind $(VALGRIND_OPTS) $^ 
+
 $(EXEC_PATH): $(OBJ)
-	$(CXX) -iquote$(INCLUDE_PREFIX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
+	$(CXX) -iquote$(INCLUDE_PREFIX) $(CXXFLAGS) -o $@ $^  $(LDFLAGS) $(LDLIBS)
 
 $(TEXEC_PATH): $(OBJ) $(T_OBJ)
-	$(CXX) -iquote$(INCLUDE_PREFIX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
+	$(CXX) -iquote$(INCLUDE_PREFIX) $(CXXFLAGS) -o $@ $^  $(LDFLAGS) $(LDLIBS)
 
-## Auto-generating implicit rules
+## Auto-generating rules
 
 # Stuff in define gets evaled twice so we need double $s
 
 GEN_DIRS = $(BIN_PATH) $(BUILD_DIR) $(TEST_DIR) $(SRC_DIR) $(TEST_SRC_DIR) $(INCLUDE_PREFIX)
-GEN_C_RULES = $(BUILD_DIR) $(TEST_DIR)
+GEN_CPP_RULES = $(BUILD_DIR) $(TEST_DIR)
 
-define make-c-goal 
+define make-cpp-goal 
 $1%.o: %.C
 	$(CXX) -iquote$(INCLUDE_PREFIX) $(CXXFLAGS) -c $$< -o $$@ $(LDFLAGS) $(LDLIBS)
 $1%.o: %.cc
@@ -103,6 +107,6 @@ $1:
 	mkdir -p $$@
 endef
 
-# the following line creates all the implicit rules for the subdirectories
-$(foreach bdir, $(GEN_C_RULES), $(eval $(call make-c-goal, $(bdir))))
+# the following line creates all the rules for the subdirectories
+$(foreach bdir, $(GEN_CPP_RULES), $(eval $(call make-cpp-goal, $(bdir))))
 $(foreach dir, $(GEN_DIRS), $(eval $(call make-dirs, $(dir))))

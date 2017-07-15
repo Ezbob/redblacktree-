@@ -9,6 +9,9 @@ CXX = g++
 # Compiler flags added
 CXXFLAGS = -g -std=c++14 -Wall -Wextra -Wpedantic
 
+# Valgrind options
+VALGRIND_OPTS =
+
 # Libraries to use 
 LDLIBS = 
 
