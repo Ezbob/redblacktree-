@@ -26,7 +26,7 @@ void RedBlackTree::Tree<Q, R>::Node<K, V>::recursive_print(RedBlackTree::Tree<Q,
     }
 
     for (auto str : ss) {
-    	os << str;
+        os << str;
     }
 
     os << " ├──";
@@ -35,7 +35,7 @@ void RedBlackTree::Tree<Q, R>::Node<K, V>::recursive_print(RedBlackTree::Tree<Q,
     ss.pop_back();
 
     for (auto str : ss) {
-    	os << str;
+        os << str;
     }
 
     os << " └──";
@@ -46,59 +46,59 @@ void RedBlackTree::Tree<Q, R>::Node<K, V>::recursive_print(RedBlackTree::Tree<Q,
 
 template<typename K, typename V>
 inline RedBlackTree::Tree<K, V>::Node<K, V> *RedBlackTree::Tree<K, V>::getFrom(RedBlackTree::Tree<K, V>::Node<K, V> *node, K key) {
-	Node<K, V> *iter = node;
-	while ( iter->key != key ) {
-		if ( iter->key > key ) {
-			iter = iter->left;
-		} else {
-			iter = iter->right;
-		}
-	}
-	return iter;
+    Node<K, V> *iter = node;
+    while ( iter->key != key ) {
+        if ( iter->key > key ) {
+            iter = iter->left;
+        } else {
+            iter = iter->right;
+        }
+    }
+    return iter;
 }
 
 template<typename K, typename V>
 RedBlackTree::Tree<K, V>::Node<K, V> *RedBlackTree::Tree<K, V>::minKeyNode(Node<K, V> *n) {
-	if (n == nill) {
-		return nill;
-	} else if (n->left == nill) {
-		return n;
-	}
-	Node<K, V> *iterator = n->left;
-	while (iterator->left != nill) {
-		iterator = iterator->left;
-	}
-	return iterator;
+    if (n == nill) {
+        return nill;
+    } else if (n->left == nill) {
+        return n;
+    }
+    Node<K, V> *iterator = n->left;
+    while (iterator->left != nill) {
+        iterator = iterator->left;
+    }
+    return iterator;
 }
 
 template<typename K, typename V>
 void RedBlackTree::Tree<K, V>::insert(K key, V *value) {
 
-	Node<K, V> *n = new Node<K, V>{key, value, nill, nill, nill};
-	
-	Node<K, V> *iterator = this->root;
-	Node<K, V> *p = nill;
-	
+    Node<K, V> *n = new Node<K, V>{key, value, nill, nill, nill};
+    
+    Node<K, V> *iterator = this->root;
+    Node<K, V> *p = nill;
+    
 
-	while ( iterator != nill ) { // traversal of the tree finding parent of node
+    while ( iterator != nill ) { // traversal of the tree finding parent of node
         p = iterator;
         if ( n->key < iterator->key ) {
             iterator = iterator->left;
         } else if ( n->key > iterator->key ) {
             iterator = iterator->right;
         } else {
-        	throw duplicatedKeyError();
+            throw duplicatedKeyError();
         }
     }
 
     n->parent = p;
     
     if ( p == nill ) {
-    	this->root = n;
+        this->root = n;
     } else if ( n->key < p->key  ) {
-    	p->left = n;
+        p->left = n;
     } else {
-    	p->right = n;
+        p->right = n;
     }
 
     n->left = nill;
@@ -109,18 +109,18 @@ void RedBlackTree::Tree<K, V>::insert(K key, V *value) {
 
 template<typename K, typename V>
 bool RedBlackTree::Tree<K, V>::remove(K key) {
-	Node<K, V> *node;
-	node = getFrom(this->root, key);
+    Node<K, V> *node;
+    node = getFrom(this->root, key);
 
     if ( node == nill ) {
-    	return false;
+        return false;
     }
 
     Node<K, V> *point = nill;
     Node<K, V> *min = node;
     auto minColor = min->color;
 
-	if ( node->left == nill ) {
+    if ( node->left == nill ) {
         point = node->right;
         transplantTree(node, node->right);     
     } else if ( node->right == nill ) {
@@ -146,7 +146,7 @@ bool RedBlackTree::Tree<K, V>::remove(K key) {
     }
     
     if ( minColor == Color::BLACK ) {
-    	removeFixup(point);
+        removeFixup(point);
     }
     delete node;
 
@@ -156,34 +156,34 @@ bool RedBlackTree::Tree<K, V>::remove(K key) {
 
 template<typename K, typename V>
 V *RedBlackTree::Tree<K, V>::minimum() {
-	Node<K, V> *iter = this->root;
+    Node<K, V> *iter = this->root;
 
-	while ( iter != nill and iter->left != nill ) {
-		iter = iter->left;
-	}
+    while ( iter != nill and iter->left != nill ) {
+        iter = iter->left;
+    }
 
-	return iter->data;
+    return iter->data;
 }
 
 template<typename K, typename V>
 V *RedBlackTree::Tree<K, V>::maximum() {
-	Node<K, V> *iter = this->root;
+    Node<K, V> *iter = this->root;
 
-	while ( iter != nill and iter->right != nill ) {
-		iter = iter->right;
-	}
+    while ( iter != nill and iter->right != nill ) {
+        iter = iter->right;
+    }
 
-	return iter->data;
+    return iter->data;
 }
 
 template<typename K, typename V>
 V *RedBlackTree::Tree<K, V>::get(K key) {
-	Node<K, V> *iter = getFrom(this->root, key);
+    Node<K, V> *iter = getFrom(this->root, key);
 
-	if (iter != nill) {
-		return iter->data;
-	}
-	return nullptr;
+    if (iter != nill) {
+        return iter->data;
+    }
+    return nullptr;
 }
 
 template<typename K, typename V>
@@ -232,19 +232,19 @@ void RedBlackTree::Tree<K, V>::rotateRight(Node<K, V> *node) {
 
 template<typename K, typename V>
 void RedBlackTree::Tree<K, V>::transplantTree( Node<K, V> *old, Node<K,V> *transplant ) {
-	if ( old->parent == nill ) {
+    if ( old->parent == nill ) {
         this->root = transplant;
     } else if ( old == old->parent->left ) {
         old->parent->left = transplant;
     } else {
         old->parent->right = transplant;
     }
-	transplant->parent = old->parent;
+    transplant->parent = old->parent;
 }
 
 template<typename K, typename V>
 void RedBlackTree::Tree<K, V>::insertFixup(Node<K, V> *node) {
-	while ( node->parent->color == Color::RED ) {
+    while ( node->parent->color == Color::RED ) {
         if ( node->parent == node->parent->parent->left ) {
             Node<K, V> *right_node = node->parent->parent->right;
             if ( right_node->color == Color::RED ) {
@@ -259,9 +259,9 @@ void RedBlackTree::Tree<K, V>::insertFixup(Node<K, V> *node) {
                 node = node->parent;
                 rotateLeft(node);
             } else {
-            	node->parent->color = Color::BLACK;
-            	node->parent->parent->color = Color::RED;
-            	rotateRight(node->parent->parent);
+                node->parent->color = Color::BLACK;
+                node->parent->parent->color = Color::RED;
+                rotateRight(node->parent->parent);
             }
 
         } else {
@@ -276,9 +276,9 @@ void RedBlackTree::Tree<K, V>::insertFixup(Node<K, V> *node) {
                 node = node->parent;
                 rotateRight(node);
             } else {
-            	node->parent->color = Color::BLACK;
-            	node->parent->parent->color = Color::RED;
-            	rotateLeft(node->parent->parent);
+                node->parent->color = Color::BLACK;
+                node->parent->parent->color = Color::RED;
+                rotateLeft(node->parent->parent);
             }
         }
     }
@@ -288,8 +288,8 @@ void RedBlackTree::Tree<K, V>::insertFixup(Node<K, V> *node) {
 template<typename K, typename V>
 void RedBlackTree::Tree<K, V>::removeFixup(Node<K, V> *node) {
 
-	while ( node->color == Color::BLACK && node != this->root ) {
-		if ( node == node->parent->left ) {
+    while ( node->color == Color::BLACK && node != this->root ) {
+        if ( node == node->parent->left ) {
             Node<K, V> *sibling = node->parent->right;
             if ( sibling->color == Color::RED ) {
 
@@ -299,7 +299,7 @@ void RedBlackTree::Tree<K, V>::removeFixup(Node<K, V> *node) {
                 sibling = node->parent->right;
             } 
             if ( sibling->left->color == Color::BLACK && 
-            	sibling->right->color == Color::BLACK ) {
+                sibling->right->color == Color::BLACK ) {
                 
                 sibling->color = Color::RED;
                 node = node->parent;
@@ -310,11 +310,11 @@ void RedBlackTree::Tree<K, V>::removeFixup(Node<K, V> *node) {
                 rotateRight( sibling );
                 sibling = node->parent->right;
             } else {
-            	sibling->color = node->parent->color;
-	            node->parent->color = Color::BLACK;
-	            sibling->right->color = Color::BLACK;
-	            rotateLeft( node->parent );
-	            node = this->root;
+                sibling->color = node->parent->color;
+                node->parent->color = Color::BLACK;
+                sibling->right->color = Color::BLACK;
+                rotateLeft( node->parent );
+                node = this->root;
             }
 
         } else if ( node == node->parent->right ) {
@@ -326,7 +326,7 @@ void RedBlackTree::Tree<K, V>::removeFixup(Node<K, V> *node) {
                 sibling = node->parent->left;
             }
             if ( sibling->right->color == Color::BLACK && 
-            	sibling->left->color == Color::BLACK ) {
+                sibling->left->color == Color::BLACK ) {
                 sibling->color = Color::RED;
                 node = node->parent;
             } else if ( sibling->left->color == Color::BLACK ) {
@@ -335,11 +335,11 @@ void RedBlackTree::Tree<K, V>::removeFixup(Node<K, V> *node) {
                 rotateLeft( sibling );
                 sibling = node->parent->left;
             } else {
-            	sibling->color = node->parent->color;
-	            node->parent->color = Color::BLACK;
-	            sibling->left->color = Color::BLACK;
-	            rotateRight( node->parent );
-	            node = this->root;
+                sibling->color = node->parent->color;
+                node->parent->color = Color::BLACK;
+                sibling->left->color = Color::BLACK;
+                rotateRight( node->parent );
+                node = this->root;
             }
         } 
     }
@@ -348,6 +348,6 @@ void RedBlackTree::Tree<K, V>::removeFixup(Node<K, V> *node) {
 
 template<typename K, typename V> 
 void RedBlackTree::Tree<K, V>::del() {
-	delete this->nill;
+    delete this->nill;
 }
 
