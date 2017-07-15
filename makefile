@@ -31,14 +31,14 @@ MODULES_DIR = $(foreach mod, $(MODULES), $(mod)/ )
 TEST_MODULES_DIR = $(foreach mod, $(TEST_MODULES), $(mod)/ )
 
 EXEC_PATH = $(addprefix $(BIN_PATH), $(EXEC))
-SRC_DIR = $(addprefix $(SOURCE_PREFIX), $(MODULES_DIR))
+SRC_DIR = $(addprefix $(SOURCE_PREFIX), $(MODULES_DIR)) $(SOURCE_PREFIX)
 BUILD_DIR = $(addprefix $(BUILD_PREFIX), $(addprefix $(COMPILED_DIR), $(MODULES_DIR))) $(addprefix $(BUILD_PREFIX), $(COMPILED_DIR))
 
 SRC = $(foreach sdir, $(SRC_DIR), $(wildcard $(sdir)*.cc)) $(foreach sdir, $(SRC_DIR), $(wildcard $(sdir)*.cpp)) 
 OBJ = $(patsubst $(SOURCE_PREFIX)%.cc, $(BUILD_PREFIX)$(COMPILED_DIR)%.o, $(filter %.cc, $(SRC))) $(patsubst $(SOURCE_PREFIX)%.cpp, $(BUILD_PREFIX)$(COMPILED_DIR)%.o, $(filter %.cpp, $(SRC))) 
 
 TEXEC_PATH = $(addprefix $(BIN_PATH), $(TEST_EXEC))
-TEST_SRC_DIR = $(addprefix $(TEST_PREFIX), $(TEST_MODULES_DIR))
+TEST_SRC_DIR = $(addprefix $(TEST_PREFIX), $(TEST_MODULES_DIR)) $(TEST_PREFIX)
 TEST_DIR = $(addprefix $(BUILD_PREFIX), $(addprefix $(T_COMPILED_DIR), $(TEST_MODULES_DIR)))
 
 T_SRC = $(foreach tdir, $(TEST_SRC_DIR), $(wildcard $(tdir)*.cc)) $(foreach tdir, $(TEST_SRC_DIR), $(wildcard $(tdir)*.cpp))
@@ -71,16 +71,16 @@ valgrind: $(EXEC_PATH)
 	valgrind $(VALGRIND_OPTS) $^ 
 
 $(EXEC_PATH): $(OBJ)
-	$(CXX) -iquote$(INCLUDE_PREFIX) $(CXXFLAGS) -o $@ $^  $(LDFLAGS) $(LDLIBS)
+	$(CXX) -iquote$(INCLUDE_PREFIX) -iquote$(TEMPLATE_PREFIX) $(CXXFLAGS) -o $@ $^  $(LDFLAGS) $(LDLIBS)
 
 $(TEXEC_PATH): $(OBJ) $(T_OBJ)
-	$(CXX) -iquote$(INCLUDE_PREFIX) $(CXXFLAGS) -o $@ $^  $(LDFLAGS) $(LDLIBS)
+	$(CXX) -iquote$(INCLUDE_PREFIX) -iquote$(TEMPLATE_PREFIX) $(CXXFLAGS) -o $@ $^  $(LDFLAGS) $(LDLIBS)
 
 ## Auto-generating rules
 
 # Stuff in define gets evaled twice so we need double $s
 
-GEN_DIRS = $(BIN_PATH) $(BUILD_DIR) $(TEST_DIR) $(SRC_DIR) $(TEST_SRC_DIR) $(INCLUDE_PREFIX)
+GEN_DIRS = $(BIN_PATH) $(BUILD_DIR) $(TEST_DIR) $(SRC_DIR) $(TEST_SRC_DIR) $(INCLUDE_PREFIX) $(TEMPLATE_PREFIX)
 GEN_CPP_RULES = $(BUILD_DIR) $(TEST_DIR)
 
 define make-cpp-goal 

@@ -30,6 +30,9 @@ EXEC = rbt
 
 ## Directory names (remember to add the trailing "/" for this to work)
 
+# template definition directory
+TEMPLATE_PREFIX = templates/
+
 # Name for the build directory
 BUILD_PREFIX = build/
 

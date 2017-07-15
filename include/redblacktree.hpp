@@ -5,6 +5,7 @@
 #include <sstream>
 #include <memory>
 #include <vector>
+#include <exception>
 
 namespace RedBlackTree {
 
@@ -86,5 +87,7 @@ namespace RedBlackTree {
 	Tree<K, V>::Node<K,V> *Tree<K, V>::nill = new Tree<K, V>::Node<K, V>{};
 	
 }
+
+#include "redblacktree.tpp"
 
 #endif
