@@ -96,7 +96,7 @@ $(TEXEC_PATH): $(OBJ) $(T_OBJ)
 # Stuff in define gets evaled twice so we need double $s
 
 GEN_DIRS = $(BIN_PATH) $(BUILD_DIR) $(TEST_DIR) $(SRC_DIR) $(TEST_SRC_DIR) $(INCLUDE_PREFIX) $(TEMPLATE_PREFIX)
-GEN_CPP_RULES = $(BUILD_DIR) $(TEST_DIR)
+GEN_RULE_DIRS = $(BUILD_DIR) $(TEST_DIR)
 
 
 define make-dirs
@@ -104,11 +104,11 @@ $1:
 	mkdir -p $$@
 endef
 
-define cpp-rule
+define compilerule
 $1%.o:%$(strip $2)
 	$(CXX) -iquote$(INCLUDE_PREFIX) -iquote$(TEMPLATE_PREFIX) $(CXXFLAGS) -c $$< -o $$@ $(LDFLAGS) $(LDLIBS)
 endef
 
 # the following line creates all the rules for the subdirectories
-$(foreach dir, $(GEN_CPP_RULES), $(foreach format, $(SUFFIX), $(eval $(call cpp-rule, $(dir), $(format))) ))
+$(foreach dir, $(GEN_RULE_DIRS), $(foreach format, $(SUFFIX), $(eval $(call compilerule, $(dir), $(format))) ))
 $(foreach dir, $(GEN_DIRS), $(eval $(call make-dirs, $(dir))))
