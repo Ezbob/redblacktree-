@@ -67,8 +67,11 @@ checkdirs: $(BUILD_DIR) $(BIN_PATH)
 clean:
 	rm -rf $(BUILD_PREFIX)
 
-valgrind: $(EXEC_PATH)
-	valgrind $(VALGRIND_OPTS) $^ 
+valgrind: all
+	valgrind $(VALGRIND_OPTS) $(EXEC_PATH)
+
+valgrind_test: tests 
+	valgrind $(VALGRIND_OPTS) $(TEXEC_PATH)
 
 $(EXEC_PATH): $(OBJ)
 	$(CXX) -iquote$(INCLUDE_PREFIX) -iquote$(TEMPLATE_PREFIX) $(CXXFLAGS) -o $@ $^  $(LDFLAGS) $(LDLIBS)

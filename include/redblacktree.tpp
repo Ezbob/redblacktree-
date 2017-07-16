@@ -1,10 +1,9 @@
-
 #include <iostream>
 #include <string>
 
 template<typename Q, typename R>
 template<typename K, typename V>
-void RedBlackTree::Tree<Q, R>::Node<K, V>::recursive_print(RedBlackTree::Tree<Q, R>::Node<K, V> *n, std::ostream &os, std::vector<std::string> &ss) {
+void RedBlackTree::Tree<Q, R>::Node<K, V>::recursivePrint(RedBlackTree::Tree<Q, R>::Node<K, V> *n, std::ostream &os, std::vector<std::string> &ss) {
 
     if ( n == nill ) {
         os << "NULL(BLACK)\n";
@@ -28,7 +27,7 @@ void RedBlackTree::Tree<Q, R>::Node<K, V>::recursive_print(RedBlackTree::Tree<Q,
 
     os << " ├──";
     ss.push_back(std::string{" │ "});
-    recursive_print(n->right, os, ss);
+    recursivePrint(n->right, os, ss);
     ss.pop_back();
 
     for (auto str : ss) {
@@ -37,7 +36,7 @@ void RedBlackTree::Tree<Q, R>::Node<K, V>::recursive_print(RedBlackTree::Tree<Q,
 
     os << " └──";
     ss.push_back(std::string{"   "});
-    recursive_print(n->left, os, ss);
+    recursivePrint(n->left, os, ss);
     ss.pop_back();    
 }
 
@@ -346,5 +345,23 @@ void RedBlackTree::Tree<K, V>::removeFixup(Node<K, V> *node) {
 template<typename K, typename V> 
 void RedBlackTree::Tree<K, V>::del() {
     delete this->nill;
+}
+
+template<typename K, typename V>
+void RedBlackTree::Tree<K, V>::deleteRecursively(Node<K, V> *node) {
+    if (node == nill) {
+        return;
+    }
+
+    deleteRecursively(node->left);
+    deleteRecursively(node->right);
+
+    if (node->left != nill) {
+        delete node->left;
+    }
+
+    if (node->right != nill) {
+        delete node->right;
+    }
 }
 

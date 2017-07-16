@@ -43,13 +43,20 @@ namespace RedBlackTree {
 			Node(U k, R *d, struct Node *parent, struct Node *left, struct Node *right) : color(Color::BLACK), 
 				key(k), data(d), left(left), right(right), parent(parent) {}
 
+			~Node() {
+				data = nullptr;
+				left = nullptr;
+				right = nullptr;
+				parent = nullptr;
+			}
+
 			template<typename Q, typename L>
 			friend std::ostream& operator<< (std::ostream &os, Node<Q, L> &n) {
 				std::vector<std::string> ss;
-				recursive_print(&n, os, ss);
+				recursivePrint(&n, os, ss);
 				return os;
 			}
-			static void recursive_print(struct Node<U, R> *n, std::ostream &os, std::vector<std::string> &ss);
+			static void recursivePrint(struct Node<U, R> *n, std::ostream &os, std::vector<std::string> &ss);
 			
 		};
 
@@ -60,6 +67,7 @@ namespace RedBlackTree {
 		void removeFixup( Node<K, V> * );
 		Node<K,V> *minKeyNode( Node<K,V> * ); 
 		inline Node<K, V> *getFrom( Node<K, V> *, K );
+		inline void deleteRecursively(Node<K, V> *);
 
 		Node<K, V> *root;
 		static struct Node<K, V> *nill;
@@ -67,6 +75,13 @@ namespace RedBlackTree {
 	public:
 
 		Tree() : root{nill} {}
+
+		~Tree() {
+			deleteRecursively(root);
+			if ( root != nill ) {
+				delete root;
+			}
+		}
 
 		V *minimum();
 		V *maximum();
