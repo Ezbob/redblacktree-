@@ -7,7 +7,7 @@
 CXX = g++
 
 # Compiler flags added
-CXXFLAGS = -g -std=c++14 -Wall -Wextra -Wpedantic
+CXXFLAGS = -O3 -std=c++14 -Wall -Wextra -Wpedantic
 
 # Valgrind options
 VALGRIND_OPTS =

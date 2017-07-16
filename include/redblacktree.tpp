@@ -69,12 +69,9 @@ RedBlackTree::Tree<K, V>::Node<K, V> *RedBlackTree::Tree<K, V>::minKeyNode(Node<
 
 template<typename K, typename V>
 void RedBlackTree::Tree<K, V>::insert(K key, V *value) {
-
     Node<K, V> *n = new Node<K, V>{key, value, nill, nill, nill};
-    
     Node<K, V> *iterator = this->root;
     Node<K, V> *p = nill;
-    
 
     while ( iterator != nill ) { // traversal of the tree finding parent of node
         p = iterator;
@@ -86,9 +83,8 @@ void RedBlackTree::Tree<K, V>::insert(K key, V *value) {
             throw duplicatedKeyError();
         }
     }
-
     n->parent = p;
-    
+
     if ( p == nill ) {
         this->root = n;
     } else if ( n->key < p->key  ) {
@@ -124,10 +120,8 @@ bool RedBlackTree::Tree<K, V>::remove(K key) {
         transplantTree(node, node->left);
     } else {
         min = minKeyNode( node->right );
-
         minColor = min->color;
         point = min->right;
-
         if ( min->parent == node ) {
             point->parent = min;
         } else {
@@ -259,7 +253,6 @@ void RedBlackTree::Tree<K, V>::insertFixup(Node<K, V> *node) {
                 node->parent->parent->color = Color::RED;
                 rotateRight(node->parent->parent);
             }
-
         } else {
             Node<K, V> *left_node = node->parent->parent->left;
             if ( left_node->color == Color::RED ) {
@@ -288,7 +281,6 @@ void RedBlackTree::Tree<K, V>::removeFixup(Node<K, V> *node) {
         if ( node == node->parent->left ) {
             Node<K, V> *sibling = node->parent->right;
             if ( sibling->color == Color::RED ) {
-
                 sibling->color = Color::BLACK;
                 node->parent->color = Color::RED;
                 rotateLeft( node->parent );
