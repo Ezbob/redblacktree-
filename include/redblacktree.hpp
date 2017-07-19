@@ -70,7 +70,7 @@ namespace RedBlackTree {
 		inline void deleteRecursively(Node<K, V> *);
 
 		Node<K, V> *root;
-		static struct Node<K, V> *nill;
+		static struct Node<K, V> *const nill;
 
 	public:
 
@@ -99,7 +99,7 @@ namespace RedBlackTree {
 	};
 
 	template<typename K,typename V>
-	Tree<K, V>::Node<K,V> *Tree<K, V>::nill = new Tree<K, V>::Node<K, V>{};
+	Tree<K, V>::Node<K,V> *const Tree<K, V>::nill = new Tree<K, V>::Node<K, V>{};
 	
 }
 
