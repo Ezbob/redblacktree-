@@ -9,100 +9,100 @@
 
 namespace RedBlackTree {
 
-	class duplicatedKeyError : public std::exception {
-		virtual const char *what() const throw() {
-			return "Duplicated key error; Red black tree does not support duplicated keys";
-		} 
-	};
+class duplicatedKeyError : public std::exception {
+    virtual const char *what() const throw() {
+        return "Duplicated key error; Red black tree does not support duplicated keys";
+    }
+};
 
-	template<typename K, typename V>
-	class Tree {
-		enum Color {
-			BLACK,
-			RED
-		};
+template<typename K, typename V>
+class Tree {
+    enum Color {
+        BLACK,
+        RED
+    };
 
-		template<typename U, typename R>
-		struct Node {
-			
-			enum Color color;
-			U key;
-			R *data;
-			struct Node *left;
-			struct Node *right;
-			struct Node *parent;
+    template<typename U, typename R>
+    struct Node {
 
-			Node() : color(Color::BLACK), left(this), right(this), parent(this) {}
+        enum Color color;
+        U key;
+        R *data;
+        struct Node *left;
+        struct Node *right;
+        struct Node *parent;
 
-			Node(U k, R *d) : color(Color::BLACK), key(k), data(d) {
-				left = nullptr;
-				right = nullptr;
-				parent = nullptr;
-			}
+        Node() : color(Color::BLACK), left(this), right(this), parent(this) {}
 
-			Node(U k, R *d, struct Node *parent, struct Node *left, struct Node *right) : color(Color::BLACK), 
-				key(k), data(d), left(left), right(right), parent(parent) {}
+        Node(U k, R *d) : color(Color::BLACK), key(k), data(d) {
+            left = nullptr;
+            right = nullptr;
+            parent = nullptr;
+        }
 
-			~Node() {
-				data = nullptr;
-				left = nullptr;
-				right = nullptr;
-				parent = nullptr;
-			}
+        Node(U k, R *d, struct Node *parent, struct Node *left, struct Node *right) : color(Color::BLACK),
+            key(k), data(d), left(left), right(right), parent(parent) {}
 
-			template<typename Q, typename L>
-			friend std::ostream& operator<< (std::ostream &os, Node<Q, L> &n) {
-				std::vector<std::string> ss;
-				recursivePrint(&n, os, ss);
-				return os;
-			}
-			static void recursivePrint(struct Node<U, R> *n, std::ostream &os, std::vector<std::string> &ss);
-			
-		};
+        ~Node() {
+            data = nullptr;
+            left = nullptr;
+            right = nullptr;
+            parent = nullptr;
+        }
 
-		void rotateLeft( Node<K, V> * );
-		void rotateRight( Node<K, V> * );
-		void transplantTree( Node<K, V> *, Node<K,V> * );
-		void insertFixup( Node<K, V> * );
-		void removeFixup( Node<K, V> * );
-		Node<K,V> *minKeyNode( Node<K,V> * ); 
-		inline Node<K, V> *getFrom( Node<K, V> *, K );
-		inline void deleteRecursively(Node<K, V> *);
+        template<typename Q, typename L>
+        friend std::ostream& operator<< (std::ostream &os, Node<Q, L> &n) {
+            std::vector<std::string> ss;
+            recursivePrint(&n, os, ss);
+            return os;
+        }
+        static void recursivePrint(struct Node<U, R> *n, std::ostream &os, std::vector<std::string> &ss);
 
-		Node<K, V> *root;
-		static struct Node<K, V> *const nill;
+    };
 
-	public:
+    void rotateLeft( Node<K, V> * );
+    void rotateRight( Node<K, V> * );
+    void transplantTree( Node<K, V> *, Node<K,V> * );
+    void insertFixup( Node<K, V> * );
+    void removeFixup( Node<K, V> * );
+    Node<K,V> *minKeyNode( Node<K,V> * );
+    inline Node<K, V> *getFrom( Node<K, V> *, K );
+    inline void deleteRecursively(Node<K, V> *);
 
-		Tree() : root{nill} {}
+    Node<K, V> *root;
+    static struct Node<K, V> *const nill;
 
-		~Tree() {
-			deleteRecursively(root);
-			if ( root != nill ) {
-				delete root;
-			}
-		}
+public:
 
-		V *minimum();
-		V *maximum();
+    Tree() : root{nill} {}
 
-		void insert(K key, V *value);
-		V *get(K key);
-		bool remove(K key);
+    ~Tree() {
+        deleteRecursively(root);
+        if ( root != nill ) {
+            delete root;
+        }
+    }
 
-		template<typename M, typename N>
-		friend std::ostream &operator<<(std::ostream& os, Tree<M, N> &t) {
-			return os << *t.root;
-		}
+    V *minimum();
+    V *maximum();
 
-		void del();
-	};
+    void insert(K key, V *value);
+    V *get(K key);
+    bool remove(K key);
 
-	template<typename K,typename V>
-	Tree<K, V>::Node<K,V> *const Tree<K, V>::nill = new Tree<K, V>::Node<K, V>{};
-	
+    template<typename M, typename N>
+    friend std::ostream &operator<<(std::ostream& os, Tree<M, N> &t) {
+        return os << *t.root;
+    }
+
+    void del();
+};
+
+template<typename K,typename V>
+Tree<K, V>::Node<K,V> *const Tree<K, V>::nill = new Tree<K, V>::Node<K, V> {};
+
 }
 
-#include "redblacktree.tpp"
+#include <redblacktree.tpp>
 
 #endif
