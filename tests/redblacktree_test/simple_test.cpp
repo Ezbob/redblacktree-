@@ -15,13 +15,13 @@ int main()
         }  else if ( elm == -1 ) {
             t.insert(elm, &v2);
         } else {
-            t.insert(elm, &v);  
+            t.insert(elm, &v);
         }
     }
 
     std::cout << t << std::endl;
 
-    std::cout << "min: " << *t.minimum() << " max: " << *t.maximum() << std::endl; 
+    std::cout << "min: " << *t.minimum() << " max: " << *t.maximum() << std::endl;
 
     std::cout << "--->" << *t.get(-1) << std::endl;
 

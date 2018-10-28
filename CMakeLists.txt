@@ -14,4 +14,8 @@ TARGET_COMPILE_OPTIONS(tests PUBLIC -std=c++17 -Wall -Wextra -pedantic)
 
 TARGET_INCLUDE_DIRECTORIES(tests PUBLIC include templates)
 
+ADD_CUSTOM_TARGET(
+    format
+    COMMAND astyle ${test_sources} ${headers} ${template_sources}
+)
 
